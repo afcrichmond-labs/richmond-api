@@ -9,50 +9,25 @@ permissions:
 jobs:
   create-prs:
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - name: Create RLS fix PR and request Roy's review
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: PR 1 - RLS fix
         run: |
           gh pr create \
             --repo afcrichmond-labs/richmond-api \
             --title "feat: RLS policy enforcement for analytics aggregate queries (ENG-55)" \
-            --body "$(cat <<'BODY'
-## Summary
-Patches the Row-Level Security gap where \`tenant_id\` was missing from \`GROUP BY\` in aggregate CTEs, causing cross-tenant data leakage in analytics dashboards.
-
-## Changes
-- Added \`tenant_id\` to all aggregate GROUP BY clauses in \`/analytics/\` query layer
-- Added RLS enforcement middleware for CTE-based queries
-- 12 new RLS regression tests added
-
-## Testing
-All tests pass. Tested on staging with 3-tenant dataset — no leakage detected.
-
-**Jira:** ENG-55 | **Merge by:** EOD Friday | **⚠️ Blocking Sprint 8 analytics deploy**
-BODY
-)" \
+            --body "Patches RLS gap where tenant_id missing from GROUP BY in aggregate CTEs. 12 new regression tests. Blocking Sprint 8 analytics deploy. Jira: ENG-55" \
             --head fix/rls-analytics-aggregate-eng55 \
             --base main \
             --reviewer roy-afcrichmond || true
 
-      - name: Create v1 deprecation headers PR and request Roy's review
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: PR 2 - v1 deprecation headers
         run: |
           gh pr create \
             --repo afcrichmond-labs/richmond-api \
             --title "feat: API v1 deprecation headers + sunset logging (ENG-56)" \
-            --body "$(cat <<'BODY'
-## Summary
-Implements \`Sunset\` and \`Deprecation\` headers on all v1 API responses, plus per-API-key v1 usage logging for partner outreach tracking.
-
-## Context
-Bantr and two other partners are still on v1. April 1 sunset is hard. **This PR is blocking partner outreach emails scheduled for Monday.**
-
-**Jira:** ENG-56 | **Linear:** ENG-175
-BODY
-)" \
+            --body "Adds Sunset + Deprecation headers on all v1 routes. Per-API-key usage logging for partner outreach. Blocking partner emails scheduled Monday. Jira: ENG-56" \
             --head feat/api-v1-deprecation-headers-eng56 \
             --base main \
             --reviewer roy-afcrichmond || true
